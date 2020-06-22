@@ -9,59 +9,65 @@ namespace TestGithub
     {
         static void Main(string[] args)
         {
-            List<Pizza> pizzas = new List<Pizza>
-            {
-                new Pizza
-                {
-                    Naam = "Pizza Margherita",
-                    Onderdelen = new List<string> { "Tomatensaus", "Mozzarella" },
-                    Prijs = 8m
-                },
-
-                new Pizza
-                {
-                    Naam = "Pizza Vegetariana",
-                    Onderdelen = new List<string>
-                            { "Tomatensaus", "Mozzarella", "Groenten" },
-                    Prijs = 9.5m
-                },
-
-                new Pizza
-                {
-                    Naam = "Pizza Napoli",
-                    Onderdelen = new List<string>
-                            { "Tomatensaus", "Mozzarella",
-                              "Ansjovis", "Kappers", "Olijven" },
-                    Prijs = 10m
-                }
-            };
-
-            //de pizzagegevens wegschrijven:
-            //elke pizza wordt als één regel tekst weggeschreven
             string locatie = @"C:\Data\";
-            StringBuilder pizzaRegel;
+
+            List<Pizza> pizzas = new List<Pizza>();
+
+            string pizzaRegel;
+            string pizzaNaam;
+            int aantalOnderdelen;
+            List<string> pizzaOnderdelen;
+            decimal prijs;
+
+            //de pizzagegevens inlezen
             try
             {
-                using var schrijver = new StreamWriter(locatie + "Pizzas.txt");
-                foreach (var pizza in pizzas)
+                using var lezer = new StreamReader(locatie + "Pizzas.txt");
+                while ((pizzaRegel = lezer.ReadLine()) != null)
                 {
-                    pizzaRegel = new StringBuilder();
-                    pizzaRegel.Append($"{pizza.Naam}:");
-                    pizzaRegel.Append($"{pizza.Onderdelen?.Count ?? 0}:");
-                    pizzaRegel.Append(
-                           $"{(pizza.Onderdelen != null ? string.Join(":", pizza.Onderdelen) : "")}:");
-                    pizzaRegel.Append(pizza.Prijs);
-                    schrijver.WriteLine(pizzaRegel); ;
+                    string[] gegevens = pizzaRegel.Split(new Char[] { ':' });
+
+                    pizzaNaam = gegevens[0];
+                    aantalOnderdelen = int.Parse(gegevens[1]);
+
+                    pizzaOnderdelen = new List<string>();
+                    for (var teller = 0; teller < aantalOnderdelen; teller++)
+                    {
+                        pizzaOnderdelen.Add(gegevens[teller + 2]);
+                    }
+                    prijs = decimal.Parse(gegevens[gegevens.Length - 1]);
+                    //of
+                    //prijs = decimal.Parse(gegevens[^1]);
+
+                    pizzas.Add(
+                        new Pizza
+                        {
+                            Naam = pizzaNaam,
+                            Onderdelen = pizzaOnderdelen,
+                            Prijs = prijs
+                        });
                 }
             }
             catch (IOException)
             {
-                Console.WriteLine("Fout bij het schrijven naar het bestand!");
+                Console.WriteLine("Fout bij het lezen van het bestand!");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+
+            //de pizzagegevens tonen
+            foreach (Pizza pizza in pizzas)
+            {
+                Console.WriteLine(pizza.ToString());
+                foreach (string onderdeel in pizza.Onderdelen)
+                {
+                    Console.WriteLine(onderdeel);
+                }
+                Console.WriteLine();
+            }
+
 
         }
     }
